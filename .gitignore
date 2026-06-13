@@ -1,0 +1,49 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+log/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.obsidian/ 
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+.air.toml
+
+# Build
+bin/
+dist/
+
+# Temporary files
+*.tmp
+*.temp 
+services\auth-svc\.obsidian
+
+# secret key
+*.pem
+
+.gocache/
+
+*.work
+*.work.*
+
+*.gocache

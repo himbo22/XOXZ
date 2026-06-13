@@ -1,0 +1,9 @@
+api_key: "devkey_xoxz"
+api_secret: "bi_mat_khong_ai_biet_2026"
+ws_url: "ws://host.docker.internal:7880" # Point to LiveKit Server
+
+redis:
+  address: "host.docker.internal:6379" # Must share same Redis as LiveKit Server
+
+# Specify temp file directory on container
+insecure: true # For local dev environment only

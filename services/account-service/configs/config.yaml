@@ -1,0 +1,91 @@
+server:
+  address: "0.0.0.0:8080"
+  port: "8080"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+  errorStack: false
+  errorLogEnabled: false
+  errorLogPattern: "error-{Ymd}.log"
+
+logger:
+  path: "./log/"
+  file: "{Y-m-d}.log"
+  prefix: ""
+  level: "info"
+  timeFormat: "2006-01-02 15:04:05"
+  ctxKeys: ["req", "TraceId"]
+  header: true
+  stSkip: 1
+  stdout: true
+  rotateSize: 0
+  rotateExpire: 0
+  rotateBackupLimit: 0
+  rotateBackupExpire: 0
+  rotateBackupCompress: 0
+  rotateCheckInterval: "1h"
+  stdoutColorDisabled: false
+  writerColorEnable: true
+  flags: 92
+
+database:
+  host: "127.0.0.1"
+  port: "5432"
+  user: "account_user"
+  password: "account_pass"
+  dbname: "account_db"
+  sslmode: "disable"
+  max_open_conns: 150
+  max_idle_conns: 10
+  conn_max_lifetime: 1
+  logger:
+    level: "error"
+    stdout: true
+  debug: true
+  timezone: "UTC"
+
+kafka:
+  brokers:
+    - "account-kafka:19092"
+  required_acks: 1
+  max_retry: 3
+  topics:
+    activity_logs: "activity-logs"
+
+redis:
+  default:
+    address: 127.0.0.1:6379
+    password: "redispass"
+    db: 0
+    idleTimeout: "60s"
+    maxConnLifetime: "90s"
+    waitTimeout: "60s"
+    dialTimeout: "30s"
+    readTimeout: "30s"
+    writeTimeout: "30s"
+    maxActive: 10000
+
+auth:
+  jwtKeyId: xoxz-key # Kong credential key (iss); override secret via AUTH_JWT_SECRET for Kong
+  accessTokenExpireMinute: 60
+  refreshTokenExpireMinute: 1440
+  gracePeriodExpireSecond: 45
+  googleClientId: xoxz-key
+  rsaPublicKey: public-key
+  rsaPrivateKey: private-key
+
+
+email:
+  mailjet_api_key: ${MAILJET_API_KEY}
+  mailjet_secret_key: ${MAILJET_SECRET_KEY}
+  from_email: xoxz@gmail.com
+  from_name: XOXZ Official
+  app_url: http://localhost:8080
+
+otel:
+  service_name: account-service
+  service_version: "1.0.0"
+  environment: development # production | staging | development
+  exporter_type: grpc # grpc | http
+  endpoint: localhost:4317
+  sample_rate: 1.0 # 1.0 = 100%, 0.1 = 10%
+  insecure: true   # disable TLS (useful for local development)

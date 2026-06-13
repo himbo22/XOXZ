@@ -1,0 +1,72 @@
+server:
+  address: "0.0.0.0:8280"
+  port: "8280"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+  errorStack: false
+  errorLogEnabled: false
+  errorLogPattern: "error-{Ymd}.log"
+
+logger:
+  path: "./log/"
+  file: "{Y-m-d}.log"
+  prefix: ""
+  level: "info"
+  timeFormat: "2006-01-02 15:04:05"
+  ctxKeys: ["req", "TraceId"]
+  header: true
+  stSkip: 1
+  stdout: true
+  rotateSize: 0
+  rotateExpire: 0
+  rotateBackupLimit: 0
+  rotateBackupExpire: 0
+  rotateBackupCompress: 0
+  rotateCheckInterval: "1h"
+  stdoutColorDisabled: false
+  writerColorEnable: true
+  flags: 92
+
+mongo:
+  uri: "mongodb://admin:strongpassword@localhost:27017"
+  dbname: "streaming"
+  timeout: 10
+  max_pool_size: 50
+  min_pool_size: 5
+  max_conns_idle_time: "15m"
+
+kafka:
+  brokers:
+    - "account-kafka:19092"
+  required_acks: 1
+  max_retry: 3
+  topics:
+    activity_logs: "activity-logs"
+
+redis:
+  default:
+    address: 127.0.0.1:6379
+    password: "redispass"
+    db: 0
+    idleTimeout: "60s"
+    maxConnLifetime: "90s"
+    waitTimeout: "60s"
+    dialTimeout: "30s"
+    readTimeout: "30s"
+    writeTimeout: "30s"
+    maxActive: 10000
+
+otel:
+  service_name: livestream-service
+  service_version: "1.0.0"
+  environment: development # production | staging | development
+  exporter_type: grpc # grpc | http
+  endpoint: localhost:4317
+  sample_rate: 1.0 # 1.0 = 100%, 0.1 = 10%
+  insecure: true   # disable TLS (useful for local development)
+
+livekit:
+  endpoint: ws://localhost:7880
+  api_key: "devkey_xoxz"
+  api_secret: "bi_mat_khong_ai_biet_2026"
+  timeout: "10s"

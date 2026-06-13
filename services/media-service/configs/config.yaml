@@ -1,0 +1,15 @@
+server:
+  address: "0.0.0.0:8180"
+  port: "8180"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+  errorStack: false
+  errorLogEnabled: false
+  errorLogPattern: "error-{Ymd}.log"
+
+minio:
+  endpoint: "127.0.0.1:8030" # point to nginx
+  access_key_id: "admin"
+  secret_access_key: "password123"
+  use_ssl: false
+  bucket_name: "media"

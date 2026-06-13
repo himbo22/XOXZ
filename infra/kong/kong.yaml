@@ -1,0 +1,22 @@
+_format_version: "3.0"
+
+services:
+  # Service identifier for your backend
+  - name: account-service
+    
+    # [IMPORTANT] Kong runs inside Docker, Go runs on the host machine
+    # so use host.docker.internal instead of localhost.
+    # Assumes Account Service is running on port 8080.
+    url: http://host.docker.internal:8080 
+    
+    routes:
+      - name: account-api-route
+        # Kong will catch all requests with this prefix
+        paths:
+          - /api/v1/internal/ping
+          - /api/v1/auth
+        
+        # If false: Client calls Kong /api/v1/users -> Kong calls Go /api/v1/users
+        # If true:  Client calls Kong /api/v1/users -> Kong calls Go / (Path gets stripped)
+        # Keep false so Go receives the full path.
+        strip_path: false

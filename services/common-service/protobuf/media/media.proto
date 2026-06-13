@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package media;
+
+// [Module name in go.mod] + [Actual directory path]
+// "github.com/himbo22/xoxz/common-service/protobuf" + "/media"
+// go_package = <module> + <path from go.mod directory to .proto folder>
+option go_package = "github.com/himbo22/xoxz/common-service/protobuf/media;media";
+
+service MediaService {
+  rpc GeneratePresignedURL(GenerateURLRequest) returns (GenerateURLResponse);
+  
+  // Confirm file is valid (Move from tmp/ to per/)
+  rpc CommitFile(CommitFileRequest) returns (CommitFileResponse);
+  
+  // Delete physical file and purge cache
+  rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse);
+}
+
+message GenerateURLRequest {
+  string user_id = 1;
+  string file_name = 2;     // exp: "avatar.png"
+  string content_type = 3;  // exp: "image/png"
+}
+
+message GenerateURLResponse {
+  string upload_url = 1;    // Link for Frontend to upload directly to MinIO
+  string tmp_path = 2;      // Temporary file storage path
+  string per_path = 3;      // Permanent file storage path
+}
+
+message CommitFileRequest {
+  string tmp_path = 1;
+  string per_path = 2;
+}
+
+message CommitFileResponse {
+  bool success = 1;
+}
+
+message DeleteFileRequest {
+  string object_path = 1;   // vd: "per/profiles/user1_xyz.jpg"
+}
+
+message DeleteFileResponse {
+  bool success = 1;
+}

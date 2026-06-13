@@ -1,0 +1,26 @@
+port: 7880
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: true
+keys:
+  "devkey_xoxz": "bi_mat_khong_ai_biet_2026"
+
+redis:
+  address: redis:6379
+
+ingress:
+  rtmp_base_url: rtmp://ingress:1935/live
+  whip_base_url: http://ingress:8080/whip
+
+turn:
+  external_tls: true
+
+webhook:
+  api_key: "devkey_xoxz"
+  urls:
+    - "http://host.docker.internal:8280/api/v1/public/webhook/livekit"
+
+logging:
+  json: false
+  level: info

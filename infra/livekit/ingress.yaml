@@ -1,0 +1,22 @@
+# Authenticate with LiveKit Server (Must match livekit.yaml)
+api_key: "devkey_xoxz"
+api_secret: "bi_mat_khong_ai_biet_2026"
+
+# Point to LiveKit Server via internal Docker network
+ws_url: "ws://livekit:7880"
+
+# Point to Redis via internal Docker network
+redis:
+  address: "redis:6379"
+
+# RTMP listening port
+rtmp_port: 1935
+whip_port: 8080
+
+max_bitrate: 4500000
+enforce_keyframe_interval: true
+
+# Logging config for debugging
+logging:
+  json: false
+  level: info

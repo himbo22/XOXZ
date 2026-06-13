@@ -1,0 +1,61 @@
+server:
+  address: "0.0.0.0:8080"
+  port: "8080"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+  errorStack: false
+  errorLogEnabled: false
+  errorLogPattern: "error-{Ymd}.log"
+
+logger:
+  path: "./log/"
+  file: "{Y-m-d}.log"
+  prefix: ""
+  level: "info"
+  timeFormat: "2006-01-02 15:04:05"
+  ctxKeys: ["req", "TraceId"]
+  header: true
+  stSkip: 1
+  stdout: true
+  rotateSize: 0
+  rotateExpire: 0
+  rotateBackupLimit: 0
+  rotateBackupExpire: 0
+  rotateBackupCompress: 0
+  rotateCheckInterval: "1h"
+  stdoutColorDisabled: false
+  writerColorEnable: true
+  flags: 92
+
+database:
+  host: "127.0.0.1"
+  port: "5432"
+  user: "artist_user"
+  password: "artist_pass"
+  dbname: "artist_db"
+  sslmode: "disable"
+  max_open_conns: 150
+  max_idle_conns: 10
+  conn_max_lifetime: 1
+  logger:
+    level: "error"
+    stdout: true
+  debug: true
+  timezone: "UTC"
+
+kafka:
+  brokers:
+    - "artist-kafka:19092"
+  required_acks: 1
+  max_retry: 3
+  topics:
+    activity_logs: "activity-logs"
+
+otel:
+  service_name: artist-service
+  service_version: "1.0.0"
+  environment: development
+  exporter_type: grpc
+  endpoint: localhost:4317
+  sample_rate: 1.0
+  insecure: true

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Test Google Login for Backend</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+  <h2>Click here to get ID Token</h2>
+
+  <div id="g_id_onload" data-client_id="421912056800-k8cmf7jlv8gpo0vom7ep946r2scl1dak.apps.googleusercontent.com"
+    data-callback="handleCredentialResponse">
+  </div>
+
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <script>
+    function handleCredentialResponse(response) {
+      console.log("Success! Copy the token below and paste it into Postman:");
+      console.log(response.credential); // This is the ID Token
+
+      // Print directly to screen for easy copying
+      document.body.innerHTML += "<br><br><b>ID Token:</b><br><textarea rows='10' cols='100'>" + response.credential + "</textarea>";
+    }
+  </script>
+</body>
+
+</html>

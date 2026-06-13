@@ -1,0 +1,80 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  filelog:
+    include:
+    #      - ./log/*.log
+    start_at: end
+    operators:
+      - type: json_parser
+  # Enable host metrics scraping
+  hostmetrics:
+    root_path: /hostfs # Point to the host machine's filesystem
+    collection_interval: 15s
+    scrapers:
+      cpu: { }      # Scrape host CPU
+      memory: { }   # Scrape host RAM
+      disk: { }     # Scrape host disk
+      network: { }  # Scrape host network
+      load: { }
+      filesystem: { }
+  postgresql:
+    endpoint: "account-postgres:5432" # Hoặc tên container DB của bạn
+    username: "account_user"
+    password: "account_pass"
+    databases: [ "account_db" ]
+    collection_interval: 10s
+    tls:
+      insecure: true
+
+connectors:
+  spanmetrics:
+    histogram:
+      explicit:
+        # Define time buckets for Heatmap/Percentile charts
+        buckets: [ 2ms, 5ms, 10ms, 20ms, 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s ]
+    # REQUIRED: Declare dimensions to group by API, Method
+    dimensions:
+      - name: http.method       # GET, POST, PUT
+      - name: http.route        # /api/users/:id (Tránh dùng http.target vì sẽ bị High Cardinality)
+      - name: http.status_code  # 200, 400, 500
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 1s
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317        # traces → Tempo (internal Docker network)
+    tls:
+      insecure: true
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write  # metrics → Prometheus
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push   # logs → Loki
+  debug:
+    verbosity: detailed  # prints every span/metric/log it receives
+
+
+service:
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      # Spanmetrics acts as an exporter (receives spans)
+      exporters: [ otlp/tempo, spanmetrics ]
+    metrics:
+      # Spanmetrics acts as a receiver (emits metrics)
+      receivers: [ otlp, hostmetrics, postgresql, spanmetrics ]
+      processors: [ batch ]
+      exporters: [ prometheusremotewrite ]
+#    logs:
+#      receivers: [ filelog ]
+#      exporters: [ loki ]
+
+#file_format:

@@ -1,0 +1,564 @@
+basePath: /
+definitions:
+  model.AuthTokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  model.AuthTokenResponseDoc:
+    properties:
+      data:
+        $ref: '#/definitions/model.AuthTokenResponse'
+      error:
+        type: string
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  model.GoogleLoginRequest:
+    properties:
+      token:
+        type: string
+    type: object
+  model.LogoutRequest:
+    properties:
+      refresh_token:
+        description: get from cookie
+        type: string
+    type: object
+  model.MessageResponseDoc:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  model.ProfileResponse:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      phone:
+        type: string
+      status:
+        type: string
+      username:
+        type: string
+    type: object
+  model.ProfileResponseDoc:
+    properties:
+      data:
+        $ref: '#/definitions/model.ProfileResponse'
+      error:
+        type: string
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  model.PublicProfileResponse:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      status:
+        type: string
+      username:
+        type: string
+    type: object
+  model.PublicProfileResponseDoc:
+    properties:
+      data:
+        $ref: '#/definitions/model.PublicProfileResponse'
+      error:
+        type: string
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  model.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        description: get from cookie
+        type: string
+    type: object
+  model.UpdateAvatarRequest:
+    properties:
+      per_path:
+        type: string
+      tmp_path:
+        type: string
+    type: object
+  model.UpdateAvatarResponse:
+    properties:
+      new_avt:
+        type: string
+    type: object
+  model.UpdateAvatarResponseDoc:
+    properties:
+      data:
+        $ref: '#/definitions/model.UpdateAvatarResponse'
+      error:
+        type: string
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  model.UpdateProfileRequest:
+    properties:
+      bio:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@iam.com
+    name: IAM Support
+    url: http://www.swagger.io/support
+  description: Identity and Access Management service providing authentication, authorization,
+    and user management APIs
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: IAM Service
+  version: "1.0"
+paths:
+  /api/v1/public/auth/google:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with a Google ID token. Web clients receive
+        the refresh token via HttpOnly cookie; mobile clients receive both tokens
+        in the response body and should persist them manually on the client side.
+      parameters:
+      - description: Unique device identifier
+        in: header
+        name: Device-ID
+        required: true
+        type: string
+      - description: 'Device type: 1=web, 2=mobile'
+        in: header
+        name: Device-Type
+        required: true
+        type: string
+      - description: Google login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.GoogleLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AuthTokenResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      summary: Sign in with Google
+      tags:
+      - Auth
+  /api/v1/public/auth/session/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidates the current session. Requires authenticated device
+        headers. Mobile clients send refresh_token in the request body. Web clients
+        use the HttpOnly refresh_token cookie.
+      parameters:
+      - description: Bearer access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Unique device identifier
+        in: header
+        name: Device-ID
+        required: true
+        type: string
+      - description: 'Device type: 1=web, 2=mobile'
+        in: header
+        name: Device-Type
+        required: true
+        type: string
+      - description: Mobile logout payload. Web clients use cookie-based refresh_token
+          instead.
+        in: body
+        name: payload
+        schema:
+          $ref: '#/definitions/model.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      security:
+      - BearerAuth: []
+      summary: Logout current session
+      tags:
+      - Auth
+  /api/v1/public/auth/session/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes the current session token. Mobile clients send refresh_token
+        in the request body. Web clients send device headers and use the HttpOnly
+        refresh_token cookie.
+      parameters:
+      - description: Mobile refresh payload. Web clients use cookie-based refresh_token
+          instead.
+        in: body
+        name: payload
+        schema:
+          $ref: '#/definitions/model.RefreshTokenRequest'
+      - description: Unique device identifier
+        in: header
+        name: Device-ID
+        required: true
+        type: string
+      - description: 'Device type: 1=web, 2=mobile'
+        in: header
+        name: Device-Type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AuthTokenResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      summary: Refresh access token
+      tags:
+      - Auth
+  /api/v1/public/auth/session/revoke-all:
+    post:
+      consumes:
+      - application/json
+      description: Invalidates all active sessions for the authenticated user using
+        the authenticated access token and device headers.
+      parameters:
+      - description: Bearer access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Unique device identifier
+        in: header
+        name: Device-ID
+        required: true
+        type: string
+      - description: 'Device type: 1=web, 2=mobile'
+        in: header
+        name: Device-Type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      security:
+      - BearerAuth: []
+      summary: Revoke all sessions
+      tags:
+      - Auth
+  /api/v1/public/profile/{username}:
+    get:
+      description: Returns a public profile by username.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PublicProfileResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      summary: Get public profile
+      tags:
+      - Profile
+  /api/v1/public/profile/me:
+    get:
+      description: Returns the authenticated user's profile.
+      parameters:
+      - description: Bearer access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Unique device identifier
+        in: header
+        name: Device-ID
+        required: true
+        type: string
+      - description: 'Device type: 1=web, 2=mobile'
+        in: header
+        name: Device-Type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ProfileResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      security:
+      - BearerAuth: []
+      summary: Get current profile
+      tags:
+      - Profile
+    put:
+      consumes:
+      - application/json
+      description: Updates editable fields on the authenticated user's profile.
+      parameters:
+      - description: Bearer access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Unique device identifier
+        in: header
+        name: Device-ID
+        required: true
+        type: string
+      - description: 'Device type: 1=web, 2=mobile'
+        in: header
+        name: Device-Type
+        required: true
+        type: string
+      - description: Profile update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ProfileResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      security:
+      - BearerAuth: []
+      summary: Update current profile
+      tags:
+      - Profile
+  /api/v1/public/profile/me/avatar:
+    put:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's avatar.
+      parameters:
+      - description: Bearer access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Unique device identifier
+        in: header
+        name: Device-ID
+        required: true
+        type: string
+      - description: 'Device type: 1=web, 2=mobile'
+        in: header
+        name: Device-Type
+        required: true
+        type: string
+      - description: Avatar update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateAvatarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UpdateAvatarResponseDoc'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.MessageResponseDoc'
+      security:
+      - BearerAuth: []
+      summary: Update avatar
+      tags:
+      - Profile
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

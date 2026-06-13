@@ -1,0 +1,30 @@
+package bootstrap
+
+import (
+	"github.com/himbo22/xoxz/artist-service/internal/config"
+	xoxz "github.com/himbo22/xoxz/common-service/xoxz/logger"
+)
+
+func InitLogger(config config.LoggerConfig) (*xoxz.XOXZ, func()) {
+	xoxzLoggerConfig := xoxz.Config{
+		Path:                 config.Path,
+		File:                 config.File,
+		Prefix:               config.Prefix,
+		Level:                config.Level,
+		TimeFormat:           config.TimeFormat,
+		CtxKeys:              config.CtxKeys,
+		Header:               config.Header,
+		StSkip:               config.StSkip,
+		Stdout:               config.Stdout,
+		RotateSize:           config.RotateSize,
+		RotateExpire:         config.RotateExpire,
+		RotateBackupLimit:    config.RotateBackupLimit,
+		RotateBackupExpire:   config.RotateBackupExpire,
+		RotateBackupCompress: config.RotateBackupCompress,
+		RotateCheckInterval:  config.RotateCheckInterval,
+		StdoutColorDisabled:  config.StdoutColorDisabled,
+		WriterColorEnable:    config.WriterColorEnable,
+		Flags:                config.Flags,
+	}
+	return xoxz.InitXoXZLogger(xoxzLoggerConfig)
+}
