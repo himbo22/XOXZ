@@ -5,7 +5,6 @@ import (
 
 	_const "github.com/himbo22/xoxz/account-service/internal/const"
 	"github.com/himbo22/xoxz/account-service/internal/model"
-	"github.com/himbo22/xoxz/common-service/xoxz/util"
 	"github.com/labstack/echo/v5"
 )
 

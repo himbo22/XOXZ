@@ -62,7 +62,7 @@ func EchoMetricsMiddleware() echo.MiddlewareFunc {
 	}
 }
 
-func EchoMiddleware() echo.MiddlewareFunc {
+func EchoTracingMiddleware() echo.MiddlewareFunc {
 	propagator := otel.GetTextMapPropagator()
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {

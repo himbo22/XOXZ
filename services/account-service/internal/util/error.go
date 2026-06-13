@@ -1,8 +1,6 @@
 package util
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type AppError struct {
 	HTTPCode   int

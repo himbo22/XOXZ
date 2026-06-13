@@ -11,12 +11,12 @@ import (
 )
 
 func main() {
-	config, err := config.LoadConfig()
+	loadConfig, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	dbConfig := config.Database
+	dbConfig := loadConfig.Database
 	// 1. Initialize the connection, usually from config or environment.
 	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v", dbConfig.Host, dbConfig.User, dbConfig.Password, dbConfig.DBName, dbConfig.Port, dbConfig.SSLMode)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
