@@ -32,6 +32,7 @@ var (
 	CodeSuccess              = CustomCode{Code: 2000, Message: "success", HTTPStatus: http.StatusOK}
 	CodeSuccessNoContent     = CustomCode{Code: 2001, Message: "success", HTTPStatus: http.StatusNoContent}
 	CodeInvalidRequest       = CustomCode{Code: 4000, Message: "invalid request", HTTPStatus: http.StatusBadRequest}
+	CodeInvalidRequestBody   = CustomCode{Code: 4000, Message: "invalid request body", HTTPStatus: http.StatusBadRequest}
 	CodeInvalidGoogleToken   = CustomCode{Code: 4001, Message: "invalid google token", HTTPStatus: http.StatusUnauthorized}
 	CodeUserEmailNotVerified = CustomCode{Code: 4002, Message: "email is not verified", HTTPStatus: http.StatusForbidden}
 	CodeUserNotFound         = CustomCode{Code: 4003, Message: "user not found", HTTPStatus: http.StatusNotFound}

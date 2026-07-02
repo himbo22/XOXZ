@@ -13,7 +13,6 @@ import (
 	"github.com/himbo22/xoxz/artist-service/internal/controller/http/artist"
 	"github.com/himbo22/xoxz/artist-service/internal/controller/router"
 	"github.com/himbo22/xoxz/artist-service/internal/domain/repository/repo_impl"
-	"github.com/himbo22/xoxz/artist-service/internal/logic"
 	"github.com/himbo22/xoxz/artist-service/internal/middleware"
 	"github.com/himbo22/xoxz/artist-service/internal/model"
 	"github.com/himbo22/xoxz/artist-service/internal/service"
@@ -42,7 +41,6 @@ var RepositorySet = wire.NewSet(
 )
 
 var ArtistSet = wire.NewSet(
-	logic.NewArtistLogic,
 	service.NewArtistService,
 )
 

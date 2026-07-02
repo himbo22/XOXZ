@@ -37,21 +37,21 @@ func SuccessResponseByCode(c *echo.Context, code _const.CustomCode, data any) er
 }
 
 // NewError creates an AppError quickly.
-func NewError(httpCode, customCode int, message string) *util.AppError {
-	return &util.AppError{
+func NewError(httpCode, customCode int, message string) *AppError {
+	return &AppError{
 		HTTPCode:   httpCode,
 		CustomCode: customCode,
 		Message:    message,
 	}
 }
 
-func NewErrorByCode(code _const.CustomCode, message ...string) *util.AppError {
+func NewErrorByCode(code _const.CustomCode, message ...string) *AppError {
 	msg := code.Message
 	if len(message) > 0 && message[0] != "" {
 		msg = message[0]
 	}
 
-	return &util.AppError{
+	return &AppError{
 		HTTPCode:   code.HTTPStatus,
 		CustomCode: code.Code,
 		Message:    msg,

@@ -11,6 +11,7 @@ import (
 func InitializeApp(cfg *config.Config) (*App, func(), error) {
 	wire.Build(
 		InfrastructureSet,
+		PartySet,
 		AuthSet,
 		ProfileSet,
 		AdminSet,

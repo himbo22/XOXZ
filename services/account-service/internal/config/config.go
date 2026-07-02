@@ -20,6 +20,7 @@ type Config struct {
 	Auth     AuthConfig      `yaml:"auth"`
 	Email    EmailConfig     `yaml:"email"`
 	Otel     TelemetryConfig `yaml:"otel"`
+	OAuth    OAuthConfig     `yaml:"oauth"`
 }
 
 // ServerConfig holds server configuration
@@ -135,6 +136,17 @@ type TelemetryConfig struct {
 	Endpoint       string  `mapstructure:"endpoint" yaml:"endpoint"`       // localhost:4317 or localhost:4318
 	SampleRate     float64 `mapstructure:"sample_rate" yaml:"sample_rate"` // 1.0 = 100%, 0.1 = 10%
 	Insecure       bool    `mapstructure:"insecure" yaml:"insecure"`       // disable TLS
+}
+
+type OAuthConfig struct {
+	Google OAuthProviderConfig `yaml:"google"`
+	Github OAuthProviderConfig `yaml:"github"`
+}
+
+type OAuthProviderConfig struct {
+	ClientID     string `yaml:"client_id"`
+	ClientSecret string `yaml:"client_secret"`
+	RedirectURL  string `yaml:"redirect_url"`
 }
 
 var (

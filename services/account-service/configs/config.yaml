@@ -89,3 +89,14 @@ otel:
   endpoint: localhost:4317
   sample_rate: 1.0 # 1.0 = 100%, 0.1 = 10%
   insecure: true   # disable TLS (useful for local development)
+
+oauth:
+  google:
+    client_id: "xxx"
+    client_secret: "xxx"
+    redirect_url: "http://localhost:8080/auth/google/callback"
+
+  github:
+    client_id: "xxx"
+    client_secret: "xxx"
+    redirect_url: "http://localhost:8080/auth/github/callback"

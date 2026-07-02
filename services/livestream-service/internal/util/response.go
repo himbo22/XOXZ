@@ -3,9 +3,8 @@ package util
 import (
 	"net/http"
 
-	"github.com/himbo22/xoxz/common-service/xoxz/model"
-	"github.com/himbo22/xoxz/common-service/xoxz/util"
 	_const "github.com/himbo22/xoxz/livestream-service/internal/const"
+	"github.com/himbo22/xoxz/livestream-service/internal/model"
 	"github.com/labstack/echo/v5"
 )
 
@@ -24,21 +23,21 @@ func SuccessResponse(c *echo.Context, httpCode int, customCode int, message stri
 }
 
 // Helper function to quickly create an error
-func NewError(httpCode, customCode int, message string) *util.AppError {
-	return &util.AppError{
+func NewError(httpCode, customCode int, message string) *AppError {
+	return &AppError{
 		HTTPCode:   httpCode,
 		CustomCode: customCode,
 		Message:    message,
 	}
 }
 
-func NewErrorByCode(code _const.CustomCode, message ...string) *util.AppError {
+func NewErrorByCode(code _const.CustomCode, message ...string) *AppError {
 	msg := code.Message
 	if len(message) > 0 && message[0] != "" {
 		msg = message[0]
 	}
 
-	return &util.AppError{
+	return &AppError{
 		HTTPCode:   code.HTTPStatus,
 		CustomCode: code.Code,
 		Message:    msg,

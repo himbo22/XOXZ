@@ -15,12 +15,14 @@ type adminController struct {
 }
 
 func (a *adminController) CreateArtistInvite(c *echo.Context) error {
-	//TODO implement me
 	req := model.CreateArtistInviteRequest{}
 	if err := c.Bind(&req); err != nil {
 		return util.NewErrorByCode(_const.CodeInvalidRequest)
 	}
 	// validate
+	if req.Email == "" || req.StageName == "" {
+		return util.NewErrorByCode(_const.CodeInvalidRequestBody)
+	}
 
 	err := a.adminService.CreateArtistInviteRequest(c.Request().Context())
 	if err != nil {

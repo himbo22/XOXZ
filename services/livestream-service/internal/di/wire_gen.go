@@ -11,7 +11,6 @@ import (
 	"github.com/himbo22/xoxz/livestream-service/internal/controller/http/livestream"
 	"github.com/himbo22/xoxz/livestream-service/internal/controller/http/webhook"
 	"github.com/himbo22/xoxz/livestream-service/internal/domain/repository/repo_impl"
-	"github.com/himbo22/xoxz/livestream-service/internal/logic"
 	"github.com/himbo22/xoxz/livestream-service/internal/service"
 )
 
@@ -31,8 +30,7 @@ func InitializeApp(cfg *config.Config) (*App, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	liveStreamLogic := logic.NewLiveStreamLogic(livestreamRepository, liveKitSDK, xoxzLogger)
-	liveStreamService := service.NewLiveStreamService(liveStreamLogic)
+	liveStreamService := service.NewLiveStreamService(livestreamRepository, liveKitSDK, xoxzLogger)
 	liveStreamController := livestream.NewLiveStreamController(xoxzLogger, liveStreamService)
 	webhookController := webhook.NewWebhookController(cfg, xoxzLogger)
 	controllers := provideControllers(liveStreamController, webhookController)

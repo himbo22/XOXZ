@@ -2,47 +2,170 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/himbo22/xoxz/account-service/internal/logic"
+	mediaGrpc "github.com/himbo22/xoxz/account-service/internal/adapter/grpc"
+	"github.com/himbo22/xoxz/account-service/internal/config"
+	_const "github.com/himbo22/xoxz/account-service/internal/const"
+	"github.com/himbo22/xoxz/account-service/internal/domain/repository"
 	"github.com/himbo22/xoxz/account-service/internal/model"
+	"github.com/himbo22/xoxz/account-service/internal/util"
+	"github.com/himbo22/xoxz/common-service/protobuf/media"
+	xoxz "github.com/himbo22/xoxz/common-service/xoxz/logger"
 )
 
 type ProfileService interface {
 	GetProfile(ctx context.Context, userID uuid.UUID) (model.ProfileResponse, error)
+	GetPublicProfile(ctx context.Context, username string) (model.PublicProfileResponse, error)
 	UpdateProfile(ctx context.Context, userID uuid.UUID, req model.UpdateProfileRequest) (model.ProfileResponse, error)
 	UpdateAvatar(ctx context.Context, req model.UpdateAvatarRequest) (model.UpdateAvatarResponse, error)
-
-	// public profile
-	GetPublicProfile(ctx context.Context, username string) (model.PublicProfileResponse, error)
 }
 
 type profileService struct {
-	profileLogic *logic.ProfileLogic
+	config      *config.Config
+	mediaClient mediaGrpc.MediaClient
+	logger      xoxz.XoxzLogger
+	userRepo    repository.UserRepository
 }
 
-func NewProfileService(profileLogic *logic.ProfileLogic) ProfileService {
+func NewProfileService(
+	config *config.Config,
+	logger xoxz.XoxzLogger,
+	mediaClient mediaGrpc.MediaClient,
+	userRepo repository.UserRepository,
+) ProfileService {
 	return &profileService{
-		profileLogic: profileLogic,
+		config:      config,
+		logger:      logger,
+		mediaClient: mediaClient,
+		userRepo:    userRepo,
 	}
 }
 
-// GetProfile implements [ProfileService].
 func (p *profileService) GetProfile(ctx context.Context, userID uuid.UUID) (model.ProfileResponse, error) {
-	return p.profileLogic.GetProfile(ctx, userID)
+	user, err := p.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return model.ProfileResponse{}, util.NewErrorByCode(_const.CodeInternalError, "database error getting user profile")
+	}
+	if user == nil {
+		return model.ProfileResponse{}, util.NewErrorByCode(_const.CodeUserNotFound)
+	}
+
+	return model.ProfileResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Phone:     user.Phone,
+		AvatarURL: user.AvatarURL,
+		Bio:       user.Bio,
+		Status:    user.Status,
+	}, nil
 }
 
-// GetPublicProfile implements [ProfileService].
 func (p *profileService) GetPublicProfile(ctx context.Context, username string) (model.PublicProfileResponse, error) {
-	return p.profileLogic.GetPublicProfile(ctx, username)
+	user, err := p.userRepo.FindByUsername(ctx, username)
+	if err != nil {
+		return model.PublicProfileResponse{}, util.NewErrorByCode(_const.CodeInternalError, "database error getting public profile")
+	}
+	if user == nil {
+		return model.PublicProfileResponse{}, util.NewErrorByCode(_const.CodeUserNotFound)
+	}
+
+	return model.PublicProfileResponse{
+		Username:  user.Username,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		AvatarURL: user.AvatarURL,
+		Status:    user.Status,
+		Bio:       user.Bio,
+	}, nil
 }
 
-// UpdateAvatar implements [ProfileService].
-func (p *profileService) UpdateAvatar(ctx context.Context, req model.UpdateAvatarRequest) (model.UpdateAvatarResponse, error) {
-	return p.profileLogic.UpdateAvatar(ctx, req)
-}
-
-// UpdateProfile implements [ProfileService].
 func (p *profileService) UpdateProfile(ctx context.Context, userID uuid.UUID, req model.UpdateProfileRequest) (model.ProfileResponse, error) {
-	return p.profileLogic.UpdateProfile(ctx, userID, req)
+	user, err := p.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return model.ProfileResponse{}, util.NewErrorByCode(_const.CodeInternalError, "database error getting user profile")
+	}
+	if user == nil {
+		return model.ProfileResponse{}, util.NewErrorByCode(_const.CodeUserNotFound)
+	}
+
+	if req.FirstName != nil {
+		user.FirstName = req.FirstName
+	}
+	if req.Username != nil {
+		existedUser, err := p.userRepo.FindByUsername(ctx, *req.Username)
+		if err != nil {
+			return model.ProfileResponse{}, util.NewErrorByCode(_const.CodeInternalError, "database error checking username")
+		}
+		if existedUser != nil && existedUser.ID != user.ID {
+			return model.ProfileResponse{}, util.NewErrorByCode(_const.CodeInvalidRequest, "username already exists")
+		}
+
+		user.Username = req.Username
+	}
+	if req.LastName != nil {
+		user.LastName = req.LastName
+	}
+	if req.Phone != nil {
+		user.Phone = req.Phone
+	}
+	if req.Bio != nil {
+		user.Bio = req.Bio
+	}
+
+	if err := p.userRepo.Update(ctx, user); err != nil {
+		return model.ProfileResponse{}, util.NewErrorByCode(_const.CodeInternalError, "database error updating user profile")
+	}
+
+	return model.ProfileResponse{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Phone:     user.Phone,
+		AvatarURL: user.AvatarURL,
+		Bio:       user.Bio,
+		Status:    user.Status,
+	}, nil
+}
+
+func (p *profileService) UpdateAvatar(ctx context.Context, req model.UpdateAvatarRequest) (model.UpdateAvatarResponse, error) {
+	user, err := p.userRepo.FindByID(ctx, req.UserID)
+	if err != nil {
+		return model.UpdateAvatarResponse{}, err
+	}
+	if user == nil {
+		return model.UpdateAvatarResponse{}, util.NewErrorByCode(_const.CodeUserNotFound)
+	}
+
+	payload := mediaGrpc.ToCommitFileRequest(req)
+
+	response, err := p.mediaClient.CommitFile(ctx, payload)
+	if err != nil {
+		return model.UpdateAvatarResponse{}, err
+	}
+	if !response.GetSuccess() {
+		return model.UpdateAvatarResponse{}, util.NewErrorByCode(_const.CodeStorageError)
+	}
+
+	user.AvatarURL = &req.PerPath
+	if err := p.userRepo.Update(ctx, user); err != nil {
+		p.mediaClient.DeleteFile(ctx, &media.DeleteFileRequest{ObjectPath: req.PerPath})
+		rollbackCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		_, delErr := p.mediaClient.DeleteFile(rollbackCtx, &media.DeleteFileRequest{ObjectPath: req.PerPath})
+
+		if delErr != nil {
+			p.logger.Errorf("CRITICAL: Orphaned object left in MinIO!", xoxz.String("path", req.PerPath), xoxz.Error(delErr))
+		}
+		return model.UpdateAvatarResponse{}, err
+	}
+
+	return model.UpdateAvatarResponse{NewAvatar: req.PerPath}, nil
 }

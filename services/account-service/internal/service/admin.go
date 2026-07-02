@@ -3,7 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/himbo22/xoxz/account-service/internal/logic"
+	"github.com/himbo22/xoxz/account-service/internal/bootstrap"
+	xoxz "github.com/himbo22/xoxz/common-service/xoxz/logger"
 )
 
 type AdminService interface {
@@ -12,21 +13,24 @@ type AdminService interface {
 }
 
 type adminService struct {
-	adminLogic *logic.AdminLogic
+	permissions *bootstrap.AccessControl
+	logger      xoxz.XoxzLogger
+}
+
+func NewAdminService(
+	logger xoxz.XoxzLogger,
+	permissions *bootstrap.AccessControl,
+) AdminService {
+	return &adminService{
+		permissions: permissions,
+		logger:      logger,
+	}
 }
 
 func (a *adminService) CreateArtistInviteRequest(ctx context.Context) error {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (a *adminService) RevokeArtistAccount(ctx context.Context) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func NewAdminService(adminLogic *logic.AdminLogic) AdminService {
-	return &adminService{
-		adminLogic: adminLogic,
-	}
+	return nil
 }

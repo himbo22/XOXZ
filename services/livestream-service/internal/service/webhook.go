@@ -3,7 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/himbo22/xoxz/livestream-service/internal/logic"
+	xoxz "github.com/himbo22/xoxz/common-service/xoxz/logger"
+	"github.com/himbo22/xoxz/livestream-service/internal/domain/repository"
 )
 
 type WebhookService interface {
@@ -16,41 +17,43 @@ type WebhookService interface {
 }
 
 type webhookService struct {
-	webhookLogic *logic.WebhookStreamLogic
+	livestreamRepo repository.LivestreamRepository
+	livekitClient  LiveKitProvider
+	logger         xoxz.XoxzLogger
 }
 
-func NewWebhookService(webhookLogic *logic.WebhookStreamLogic) WebhookService {
+func NewWebhookService(
+	livestreamRepo repository.LivestreamRepository,
+	livekitClient LiveKitProvider,
+	logger xoxz.XoxzLogger,
+) WebhookService {
 	return &webhookService{
-		webhookLogic: webhookLogic,
+		livekitClient:  livekitClient,
+		livestreamRepo: livestreamRepo,
+		logger:         logger,
 	}
 }
 
-func (w *webhookService) OnStreamStarted(ctx context.Context, roomName string) error {
-	//TODO implement me
-	panic("implement me")
+func (s *webhookService) OnStreamStarted(ctx context.Context, roomName string) error {
+	return nil
 }
 
-func (w *webhookService) OnStreamEnded(ctx context.Context, roomName string) error {
-	//TODO implement me
-	panic("implement me")
+func (s *webhookService) OnStreamEnded(ctx context.Context, roomName string) error {
+	return nil
 }
 
-func (w *webhookService) OnViewerJoined(ctx context.Context, roomName string, identity string) error {
-	//TODO implement me
-	panic("implement me")
+func (s *webhookService) OnViewerJoined(ctx context.Context, roomName string, identity string) error {
+	return nil
 }
 
-func (w *webhookService) OnViewerLeft(ctx context.Context, roomName string, identity string) error {
-	//TODO implement me
-	panic("implement me")
+func (s *webhookService) OnViewerLeft(ctx context.Context, roomName string, identity string) error {
+	return nil
 }
 
-func (w *webhookService) OnRecordStarted(ctx context.Context, roomName string, egressID string) error {
-	//TODO implement me
-	panic("implement me")
+func (s *webhookService) OnRecordStarted(ctx context.Context, roomName string, egressID string) error {
+	return nil
 }
 
-func (w *webhookService) OnRecordEnded(ctx context.Context, roomName string, egressID string, videoURL string) error {
-	//TODO implement me
-	panic("implement me")
+func (s *webhookService) OnRecordEnded(ctx context.Context, roomName string, egressID string, videoURL string) error {
+	return nil
 }

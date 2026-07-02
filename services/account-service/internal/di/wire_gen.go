@@ -12,7 +12,6 @@ import (
 	"github.com/himbo22/xoxz/account-service/internal/controller/http/auth"
 	"github.com/himbo22/xoxz/account-service/internal/controller/http/profile"
 	"github.com/himbo22/xoxz/account-service/internal/domain/repository/repository_impl"
-	"github.com/himbo22/xoxz/account-service/internal/logic"
 	"github.com/himbo22/xoxz/account-service/internal/service"
 )
 
@@ -30,6 +29,7 @@ func InitializeApp(cfg *config.Config) (*App, func(), error) {
 	roleRepository := repository_impl.NewRoleRepository(db)
 	userRoleRepository := repository_impl.NewUserRoleRepository(db)
 	txRunner := repository_impl.NewTxManager(db)
+	googleOAuthAdapter := provideGoogleAuth(cfg)
 	client, cleanup3, err := provideRedisClient(cfg)
 	if err != nil {
 		cleanup2()
@@ -37,8 +37,7 @@ func InitializeApp(cfg *config.Config) (*App, func(), error) {
 		return nil, nil, err
 	}
 	redisRepository := repository_impl.NewRedisRepository(client, xoxzLogger)
-	authLogic := logic.NewAuthLogic(cfg, xoxzLogger, userRepository, identityRepository, roleRepository, userRoleRepository, txRunner, redisRepository)
-	authService := service.NewAuthService(authLogic)
+	authService := service.NewAuthService(cfg, xoxzLogger, userRepository, identityRepository, roleRepository, userRoleRepository, txRunner, googleOAuthAdapter, redisRepository)
 	authController := auth.NewAuthController(authService, xoxzLogger)
 	mediaClient, cleanup4, err := provideGrpcMediaClient()
 	if err != nil {
@@ -47,8 +46,7 @@ func InitializeApp(cfg *config.Config) (*App, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	profileLogic := logic.NewProfileLogic(cfg, xoxzLogger, mediaClient, userRepository)
-	profileService := service.NewProfileService(profileLogic)
+	profileService := service.NewProfileService(cfg, xoxzLogger, mediaClient, userRepository)
 	profileController := profile.NewProfileController(profileService)
 	rolePermissionRepository := repository_impl.NewRolePermissionRepository(db)
 	permissionRepository := repository_impl.NewPermissionRepository(db)
@@ -60,8 +58,7 @@ func InitializeApp(cfg *config.Config) (*App, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	adminLogic := logic.NewAdminLogic(xoxzLogger, accessControl)
-	adminService := service.NewAdminService(adminLogic)
+	adminService := service.NewAdminService(xoxzLogger, accessControl)
 	adminController := admin.NewAdminController(adminService, xoxzLogger)
 	controllers := provideControllers(authController, profileController, adminController)
 	authMiddleware := provideAuthMiddleware(redisRepository, accessControl)

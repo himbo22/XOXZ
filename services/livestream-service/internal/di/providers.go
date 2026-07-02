@@ -2,6 +2,7 @@ package di
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,16 +11,16 @@ import (
 	"github.com/google/wire"
 	"github.com/himbo22/xoxz/common-service/monitoring/telemetry"
 	xoxzLogger "github.com/himbo22/xoxz/common-service/xoxz/logger"
-	livekit "github.com/himbo22/xoxz/livestream-service/internal/adapter/livekit"
+	livekitAdapter "github.com/himbo22/xoxz/livestream-service/internal/adapter/livekit"
 	"github.com/himbo22/xoxz/livestream-service/internal/bootstrap"
 	"github.com/himbo22/xoxz/livestream-service/internal/config"
 	"github.com/himbo22/xoxz/livestream-service/internal/controller/http/livestream"
 	"github.com/himbo22/xoxz/livestream-service/internal/controller/http/webhook"
 	"github.com/himbo22/xoxz/livestream-service/internal/controller/router"
 	"github.com/himbo22/xoxz/livestream-service/internal/domain/repository/repo_impl"
-	"github.com/himbo22/xoxz/livestream-service/internal/logic"
 	"github.com/himbo22/xoxz/livestream-service/internal/model"
 	"github.com/himbo22/xoxz/livestream-service/internal/service"
+	"github.com/himbo22/xoxz/livestream-service/internal/util"
 	"github.com/labstack/echo/v5"
 	echoMiddleware "github.com/labstack/echo/v5/middleware"
 	"github.com/redis/go-redis/v9"
@@ -32,6 +33,7 @@ var InfrastructureSet = wire.NewSet(
 	provideRedisClient,
 	provideOtelCollector,
 	provideLiveKitSDK,
+	wire.Bind(new(service.LiveKitProvider), new(*livekitAdapter.LiveKitSDK)),
 	provideEchoApp,
 )
 
@@ -46,7 +48,6 @@ var RepositorySet = wire.NewSet(
 )
 
 var LiveStreamSet = wire.NewSet(
-	logic.NewLiveStreamLogic,
 	service.NewLiveStreamService,
 )
 
@@ -91,7 +92,7 @@ func provideOtelCollector(cfg *config.Config) (*OtelTracerToken, func(), error) 
 	return &OtelTracerToken{}, cleanup, nil
 }
 
-func provideLiveKitSDK(cfg *config.Config, logger xoxzLogger.XoxzLogger) (*livekit.LiveKitSDK, error) {
+func provideLiveKitSDK(cfg *config.Config, logger xoxzLogger.XoxzLogger) (*livekitAdapter.LiveKitSDK, error) {
 	client, err := bootstrap.NewLiveKitSDK(cfg.LiveKit, logger)
 	if err != nil {
 		return nil, err

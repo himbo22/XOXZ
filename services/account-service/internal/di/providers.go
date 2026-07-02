@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/wire"
 	mediaGrpc "github.com/himbo22/xoxz/account-service/internal/adapter/grpc"
+	"github.com/himbo22/xoxz/account-service/internal/adapter/oauth"
 	"github.com/himbo22/xoxz/account-service/internal/bootstrap"
 	"github.com/himbo22/xoxz/account-service/internal/config"
 	"github.com/himbo22/xoxz/account-service/internal/controller/http/admin"
@@ -18,7 +19,6 @@ import (
 	"github.com/himbo22/xoxz/account-service/internal/controller/router"
 	"github.com/himbo22/xoxz/account-service/internal/domain/repository"
 	"github.com/himbo22/xoxz/account-service/internal/domain/repository/repository_impl"
-	"github.com/himbo22/xoxz/account-service/internal/logic"
 	"github.com/himbo22/xoxz/account-service/internal/middleware"
 	"github.com/himbo22/xoxz/account-service/internal/model"
 	"github.com/himbo22/xoxz/account-service/internal/service"
@@ -36,8 +36,13 @@ var InfrastructureSet = wire.NewSet(
 	providePostgreSQL,
 	provideRedisClient,
 	provideOtelCollector,
+)
+
+var PartySet = wire.NewSet(
 	provideEchoApp,
 	provideGrpcMediaClient,
+	provideGoogleAuth,
+	wire.Bind(new(service.GoogleOAuthProvider), new(*oauth.GoogleOAuthAdapter)),
 )
 
 var ControllerSet = wire.NewSet(
@@ -59,17 +64,14 @@ var RepositorySet = wire.NewSet(
 )
 
 var AuthSet = wire.NewSet(
-	logic.NewAuthLogic,
 	service.NewAuthService,
 )
 
 var ProfileSet = wire.NewSet(
-	logic.NewProfileLogic,
 	service.NewProfileService,
 )
 
 var AdminSet = wire.NewSet(
-	logic.NewAdminLogic,
 	service.NewAdminService,
 )
 
@@ -210,6 +212,15 @@ func provideEchoApp(
 
 	router.SetupRouters(e, controller, &authMiddleware)
 	return e
+}
+
+func provideGoogleAuth(cfg *config.Config) *oauth.GoogleOAuthAdapter {
+	authConfig := oauth.GoogleOAuthConfig{
+		ClientID:     cfg.OAuth.Google.ClientID,
+		ClientSecret: cfg.OAuth.Google.ClientSecret,
+		RedirectURL:  cfg.OAuth.Google.RedirectURL,
+	}
+	return oauth.NewGoogleOAuthAdapter(authConfig)
 }
 
 func providePostgreSQL(cfg *config.Config) (*gorm.DB, func(), error) {

@@ -10,7 +10,6 @@ import (
 	"github.com/himbo22/xoxz/artist-service/internal/config"
 	"github.com/himbo22/xoxz/artist-service/internal/controller/http/artist"
 	"github.com/himbo22/xoxz/artist-service/internal/domain/repository/repo_impl"
-	"github.com/himbo22/xoxz/artist-service/internal/logic"
 	"github.com/himbo22/xoxz/artist-service/internal/service"
 )
 
@@ -22,8 +21,7 @@ func InitializeApp(cfg *config.Config) (*App, func(), error) {
 		return nil, nil, err
 	}
 	artistRepository := repo_impl.NewArtistRepository(db)
-	artistLogic := logic.NewArtistLogic(xoxzLogger, artistRepository)
-	artistService := service.NewArtistService(artistLogic)
+	artistService := service.NewArtistService(xoxzLogger, artistRepository)
 	artistController := artist.NewArtistController(xoxzLogger, artistService)
 	controllers := provideControllers(artistController)
 	echo := provideEchoApp(controllers, xoxzLogger)
